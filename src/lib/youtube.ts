@@ -62,6 +62,7 @@ export async function getVideoStats({
   const { views, likes, dislikes, commentCount, ratio, title } =
     formatVideoData(video);
 
+  // TODO format the messages with an array, that way we can take an array of properties to exclude
   if (isReplyToMessage) {
     return `${title}\n\n👍 Likes: ${likes}\n\n👎 Dislikes: ${dislikes}\n\n📈 Ratio: ${ratio}%\n\n👀 Views: ${views}\n\n💬 Comments: ${commentCount}`;
   }
