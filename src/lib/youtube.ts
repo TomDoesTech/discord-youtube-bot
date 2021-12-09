@@ -63,7 +63,7 @@ export async function getVideoStats({
     formatVideoData(video);
 
   if (isReplyToMessage) {
-    return `Beep bop, here's some stats about that video \n👍 Likes: ${likes}\n\n👎 Dislikes: ${dislikes}\n\n📈 Ratio: ${ratio}%\n\n👀 Views: ${views}\n\n💬 Comments: ${commentCount}`;
+    return `${title}\n\n👍 Likes: ${likes}\n\n👎 Dislikes: ${dislikes}\n\n📈 Ratio: ${ratio}%\n\n👀 Views: ${views}\n\n💬 Comments: ${commentCount}`;
   }
 
   return `${title}\n\n👍 Likes: ${likes}\n\n👎 Dislikes: ${dislikes}\n\n📈 Ratio: ${ratio}%\n\n👀 Views: ${views}\n\n💬 Comments: ${commentCount}\n https://youtube.com/watch?v=${videoId}`;
