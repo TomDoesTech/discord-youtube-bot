@@ -10,24 +10,31 @@
   "scripts": {
     "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
     "setup": "PORT=3000 node setup.mjs",
-    "build": "tsc"
+    "build": "tsc",
+    "test": "jest"
   },
   "dependencies": {
     "@discordjs/builders": "^0.9.0",
     "@discordjs/rest": "^0.1.0-canary.0",
     "axios": "^0.24.0",
+    "dayjs": "^1.10.7",
     "discord.js": "^13.3.1",
     "dotenv": "^10.0.0",
     "express": "^4.17.1",
     "googleapis": "^92.0.0",
     "lodash": "^4.17.21",
-    "open": "^8.4.0"
+    "open": "^8.4.0",
+    "pino": "^7.5.1",
+    "pino-pretty": "^7.2.0"
   },
   "resolutions": {
     "ow": "0.27.0"
   },
   "devDependencies": {
+    "@types/jest": "^27.0.3",
     "@types/lodash": "^4.14.178",
+    "jest": "^27.4.4",
+    "ts-jest": "^27.1.1",
     "ts-node-dev": "^1.1.8",
     "typescript": "^4.5.2"
   }

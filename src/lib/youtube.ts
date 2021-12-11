@@ -1,7 +1,9 @@
 import { google, youtube_v3 } from "googleapis";
+import { get } from "lodash";
 import fs from "fs";
 import path from "path";
 import { Tokens } from "../types/app";
+import { Message } from "discord.js";
 
 const tokens: Tokens = JSON.parse(
   fs.readFileSync(path.resolve(process.cwd() + "/tokens.json"), {
@@ -73,11 +75,49 @@ export async function getVideoStats({
 const ytVideoRegExp =
   /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
 
-export function ytUrlParser(url: string): string | null {
+export function getVideoIdFromYtUrl(url: string): string | null {
+  try {
+    const u = new URL(url);
+
+    const searchParams = new URLSearchParams(u.searchParams);
+
+    if (searchParams.has("v")) {
+      return searchParams.get("v");
+    }
+  } catch (e) {}
+
   const match = url.match(ytVideoRegExp);
 
   if (match && match[7].length == 11) {
     return match[7];
+  }
+
+  return null;
+}
+
+export function getVideoIdFromMessage({
+  message,
+}: {
+  message: Message;
+}): string | null {
+  const embeddedUrl = get(message, "embeds[0].url");
+
+  if (embeddedUrl) {
+    return getVideoIdFromYtUrl(embeddedUrl);
+  }
+
+  const { content } = message;
+
+  if (
+    content.startsWith("https://youtu.be/") ||
+    content.startsWith("https://www.youtu")
+  ) {
+    return getVideoIdFromYtUrl(message.content);
+  }
+
+  // Try avoid using the regex
+  if (ytVideoRegExp.test(content)) {
+    return getVideoIdFromYtUrl(message.content);
   }
 
   return null;

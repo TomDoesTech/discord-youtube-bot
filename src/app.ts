@@ -1,7 +1,8 @@
 require("dotenv").config();
 import { get } from "lodash";
-import Discord, { Intents, MessageEvent } from "discord.js";
-import { getVideoStats, ytUrlParser } from "./lib/youtube";
+import Discord, { Intents } from "discord.js";
+import { getVideoStats, getVideoIdFromMessage } from "./lib/youtube";
+import logger from "./lib/logger";
 
 const client = new Discord.Client({
   intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES],
@@ -10,20 +11,23 @@ const client = new Discord.Client({
 client.login(process.env.DISCORD_TOKEN);
 
 client.on("ready", () => {
-  console.log(`Logged in as ${client.user?.tag}!`);
+  logger.info(`Logged in as ${client.user?.tag}!`);
 });
 
 client.on<string>("messageCreate", async function (message) {
-  const embeddedUrl = get(message, "embeds[0].url");
-
-  const videoId = embeddedUrl ? ytUrlParser(embeddedUrl) : null;
+  const videoId = getVideoIdFromMessage({ message });
 
   if (videoId) {
-    const res = videoId
-      ? await getVideoStats({ videoId, isReplyToMessage: true })
-      : "Please provide a video ID";
+    logger.info(`Fetching data video with ID ${videoId}`);
 
-    message.reply(res);
+    try {
+      const res = videoId
+        ? await getVideoStats({ videoId, isReplyToMessage: true })
+        : "Please provide a video ID";
+      message.reply(res);
+    } catch (e) {
+      logger.error(e, `Error getting video by id ${videoId}`);
+    }
   }
 });
 
