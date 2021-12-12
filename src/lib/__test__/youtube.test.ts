@@ -1,4 +1,4 @@
-import { getVideoIdFromMessage } from "../youtube";
+import { getVideoIdFromMessage, getVideoStats } from "../youtube";
 
 describe("youtube", () => {
   const videoId = "a_N3ixrB2rY";
@@ -23,5 +23,19 @@ describe("youtube", () => {
         },
       })
     ).toBe(videoId);
+  });
+});
+
+describe("Format message", () => {
+  const videoId = "NGxVLnJKhP8";
+
+  it("should format with disabled error if likes are disabled", async () => {
+    const video = await getVideoStats({ videoId, isReplyToMessage: false });
+    expect(video.includes("Disabled by the video creator")).toBe(true);
+  });
+
+  it("should not show video link on reply messages", async () => {
+    const video = await getVideoStats({ videoId, isReplyToMessage: true });
+    expect(video.includes("https://youtu.be/")).toBe(false);
   });
 });

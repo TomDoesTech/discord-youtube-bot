@@ -38,7 +38,34 @@ function formatVideoData(video: youtube_v3.Schema$Video) {
 
   const commentCount = video.statistics?.commentCount;
 
-  return { likes, dislikes, ratio, views, title, commentCount };
+  let result = [
+    { name: "title", msg: `🔮 Title: ${title}` },
+    { name: "likes", msg: `👍 Likes: ${likes}` },
+    { name: "dislikes", msg: `👎 Dislikes: ${dislikes}` },
+    { name: "ratio", msg: `📈 Ratio: ${ratio}` },
+    { name: "views", msg: `👀 Views: ${views}` },
+    { name: "commentCount", msg: `💬 Comments: ${commentCount}` },
+    { name: "link", msg: `https://youtube.com/watch?v=${video.id}` },
+  ];
+
+  if (isNaN(ratio)) {
+    /**
+     * These fields can be disabled by the video author,
+     * if they are, change the field msg.
+     */
+    const disabled = ["likes", "dislikes", "ratio"];
+
+    result = result.map((el) =>
+      disabled.includes(el.name)
+        ? {
+            ...el,
+            msg: `${el.msg.split(": ")[0]}: Disabled by the video creator`,
+          }
+        : el
+    );
+  }
+
+  return result;
 }
 
 export async function getVideoStats({
@@ -61,19 +88,23 @@ export async function getVideoStats({
     return `Could not find video with ID ${videoId}. Copy the ID from the video URL.`;
   }
 
-  const { views, likes, dislikes, commentCount, ratio, title } =
-    formatVideoData(video);
+  const formatted = formatVideoData(video);
 
-  // TODO format the messages with an array, that way we can take an array of properties to exclude
-  if (isReplyToMessage) {
-    return `${title}\n\n👍 Likes: ${likes}\n\n👎 Dislikes: ${dislikes}\n\n📈 Ratio: ${ratio}%\n\n👀 Views: ${views}\n\n💬 Comments: ${commentCount}`;
-  }
-
-  return `${title}\n\n👍 Likes: ${likes}\n\n👎 Dislikes: ${dislikes}\n\n📈 Ratio: ${ratio}%\n\n👀 Views: ${views}\n\n💬 Comments: ${commentCount}\n https://youtube.com/watch?v=${videoId}`;
+  return generateMessage(formatted, isReplyToMessage);
 }
 
 const ytVideoRegExp =
   /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+
+const generateMessage = (
+  data: ReturnType<typeof formatVideoData>,
+  isReply: boolean
+) => {
+  const stats = isReply ? data.filter((el) => el.name !== "link") : data;
+  const message = stats.map((el) => el.msg).join(`\n\n`);
+
+  return message;
+};
 
 export function getVideoIdFromYtUrl(url: string): string | null {
   try {
